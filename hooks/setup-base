@@ -1,0 +1,2 @@
+apt-get update
+apt-get install cmake ninja-build python3-pykwalify python3-ruamel.yaml python3-pyelftools

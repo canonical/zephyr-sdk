@@ -1,0 +1,56 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "enabledManagers": [
+    "custom.regex"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^VERSION$/"],
+      "matchStrings": [
+        "(?<currentValue>[0-9.]+)"
+      ],
+      "depNameTemplate": "zephyrproject-rtos/zephyr",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "versioningTemplate": "semver"
+    }
+  ],
+  "baseBranchPatterns": [
+    "3.7",
+    "4.0",
+    "4.1",
+    "4.2",
+    "4.3"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["zephyrproject-rtos/zephyr"],
+      "matchBaseBranches": ["3.7"],
+      "allowedVersions": "/^3\\.7\\./"
+    },
+    {
+      "matchPackageNames": ["zephyrproject-rtos/zephyr"],
+      "matchBaseBranches": ["4.0"],
+      "allowedVersions": "/^4\\.0\\./"
+    },
+    {
+      "matchPackageNames": ["zephyrproject-rtos/zephyr"],
+      "matchBaseBranches": ["4.1"],
+      "allowedVersions": "/^4\\.1\\./"
+    },
+    {
+      "matchPackageNames": ["zephyrproject-rtos/zephyr"],
+      "matchBaseBranches": ["4.2"],
+      "allowedVersions": "/^4\\.2\\./"
+    },
+    {
+      "matchPackageNames": ["zephyrproject-rtos/zephyr"],
+      "matchBaseBranches": ["4.3"],
+      "allowedVersions": "/^4\\.3\\./"
+    }
+  ]
+}
