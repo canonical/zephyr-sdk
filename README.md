@@ -26,11 +26,11 @@ name: dev
 base: ubuntu@24.04
 sdks:
   - name: uv
-    channel: all/edge
+    channel: 0.9/stable
   - name: zephyr
-    channel: 24.04/edge
+    channel: 4.3/stable
   - name: zephyr-amd64
-    channel: 24.04/edge
+    channel: 0.17.4/stable
 
 actions:
   build-amd64: |-
