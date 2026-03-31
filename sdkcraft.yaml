@@ -68,9 +68,9 @@ parts:
       - astral-uv
   zephyr-sdk:
     plugin: dump
-    source: https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.17.4/zephyr-sdk-0.17.4_linux-x86_64_minimal.tar.xz
+    source: https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v1.0.1/zephyr-sdk-1.0.1_linux-x86_64_minimal.tar.xz
     source-type: tar
-    source-checksum: sha256/a7258bf50c892c4669712b2aacdfcd5e303245bcf36cb458a296039a664594f5
+    source-checksum: sha256/ca9bc0ff66fafca1dac9d592a36d953cf16d096a9d09b1c0357f021cf9f6a7eb
     organize:
       "*": zephyr-sdk/
     override-build: |
