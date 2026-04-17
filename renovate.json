@@ -11,7 +11,7 @@
       "customType": "regex",
       "managerFilePatterns": ["/^VERSION$/"],
       "matchStrings": [
-        "(?<currentValue>[0-9.]+)"
+        "(?<currentValue>[0-9.]+(?:-[a-zA-Z0-9.]+)?)"
       ],
       "depNameTemplate": "zephyrproject-rtos/zephyr",
       "datasourceTemplate": "github-releases",
