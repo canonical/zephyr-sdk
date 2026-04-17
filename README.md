@@ -1,18 +1,22 @@
 # Zephyr SDK for Workshop
 
 This SDK provides the Zephyr RTOS source tree and build tools (west,
-cmake, ninja) for embedded firmware development. A companion toolchain SDK is
-required to target a specific architecture. The `venv` plug should be
-connected to a venv provider such as the `uv` SDK. The Zephyr build cache and
-Python virtual environment are persisted on the host across workshop updates.
+cmake, ninja) for embedded firmware development. A companion `zephyr-sdk-ng`
+SDK provides the toolchain bundle, and individual toolchain SDKs (e.g.
+`zephyr-amd64`) supply architecture-specific cross-compilers. The `venv` plug
+should be connected to a venv provider such as the `uv` SDK. The Zephyr build
+cache and Python virtual environment are persisted on the host across workshop
+updates.
 
-### Available toolchain SDKs
+### Compatibility matrix
 
-- `zephyr-amd64` — x86_64-zephyr-elf
-- `zephyr-arm` — arm-zephyr-eabi
-- `zephyr-arm64` — aarch64-zephyr-elf
-- `zephyr-riscv64` — riscv64-zephyr-elf (also ships ESP32 HAL modules)
-- `zephyr-xtensa-espressif-esp32s3` — xtensa-espressif_esp32s3_zephyr-elf
+| SDK NG / Toolchain | Zephyr |
+|---|---|
+| 1.1.x | 4.5.x |
+| 1.0.x | 4.4.x |
+| 0.17.x | 4.2.x, 4.3.x |
+
+The `zephyr` SDK's `check-health` hook verifies this compatibility at runtime.
 
 ---
 
@@ -26,11 +30,13 @@ name: dev
 base: ubuntu@24.04
 sdks:
   - name: uv
-    channel: 0.9/stable
+    channel: latest/stable
   - name: zephyr
-    channel: 4.3/stable
+    channel: 4.4/stable
+  - name: zephyr-sdk-ng
+    channel: 1.0.1/stable
   - name: zephyr-amd64
-    channel: 0.17.4/stable
+    channel: 1.0.1/stable
 
 actions:
   build-amd64: |-
@@ -49,7 +55,9 @@ actions:
     done
 
 connections:
-  - plug: zephyr:amd64
+  - plug: zephyr:sdk-ng
+    slot: zephyr-sdk-ng:sdk-ng
+  - plug: zephyr-sdk-ng:amd64
     slot: zephyr-amd64:toolchain
   - plug: zephyr:venv
     slot: uv:venv
@@ -64,11 +72,13 @@ riscv64/ESP32-C3) and their corresponding build actions.
 
 ### Prerequisites
 
-1. A companion toolchain SDK is required. The reference workshop above uses
-   `zephyr-amd64` for x86_64 targets. Substitute the appropriate toolchain SDK
-   and connection for other architectures.
-2. A venv provider is required. Connect the `venv` plug to the `uv` SDK (or
-   another provider). On first launch, the SDK installs west into this venv.
+1. The `zephyr-sdk-ng` SDK is required — it provides the SDK NG bundle
+   (host tools, CMake toolchain files). Connect the `sdk-ng` plug on `zephyr`
+   to the `sdk-ng` slot on `zephyr-sdk-ng`.
+2. At least one toolchain SDK (e.g. `zephyr-amd64`) is required. Connect its
+   `toolchain` slot to the matching architecture plug on `zephyr-sdk-ng`.
+3. A venv provider is required. Connect the `venv` plug to the `uv` SDK (or
+   another provider). On first launch, the SDK installs `west` into this venv.
 
 ### Build firmware
 
@@ -86,53 +96,27 @@ workshop run build-amd64
 
 ## Plugs (resources this SDK consumes)
 
+### `sdk-ng`
+
+- Interface: `mount`
+- Workshop target: `$SDK/zephyr-sdk`
+- Purpose: Receives the SDK NG bundle from `zephyr-sdk-ng`. This provides
+  host tools, CMake toolchain files, and mount points for architecture-specific
+  toolchains. The `check-health` hook verifies that this plug is connected and
+  that the SDK NG version is compatible with the Zephyr version.
+
 ### `zephyr-cache`
 
 - Interface: `mount`
 - Workshop target: `/home/workshop/.cache/zephyr`
 - Purpose: Persists the Zephyr build cache across workshop updates.
 
-### `amd64`
-
-- Interface: `mount`
-- Workshop target: `$SDK/zephyr-sdk/x86_64-zephyr-elf`
-- Purpose: Mount point for the x86_64 cross-compiler toolchain from the
-  `zephyr-amd64` SDK.
-
-### `arm64`
-
-- Interface: `mount`
-- Workshop target: `$SDK/zephyr-sdk/aarch64-zephyr-elf`
-- Purpose: Mount point for the AArch64 cross-compiler toolchain from the
-  `zephyr-arm64` SDK.
-
-### `arm`
-
-- Interface: `mount`
-- Workshop target: `$SDK/zephyr-sdk/arm-zephyr-eabi`
-- Purpose: Mount point for the ARM cross-compiler toolchain from the
-  `zephyr-arm` SDK.
-
-### `riscv64`
-
-- Interface: `mount`
-- Workshop target: `$SDK/zephyr-sdk/riscv64-zephyr-elf`
-- Purpose: Mount point for the RISC-V cross-compiler toolchain from the
-  `zephyr-riscv64` SDK.
-
-### `xtensa-espressif-esp32s3`
-
-- Interface: `mount`
-- Workshop target: `$SDK/zephyr-sdk/xtensa-espressif_esp32s3_zephyr-elf`
-- Purpose: Mount point for the Xtensa cross-compiler toolchain from the
-  `zephyr-xtensa-espressif-esp32s3` SDK.
-
 ### `modules`
 
 - Interface: `mount`
 - Workshop target: `/home/workshop/modules`
 - Purpose: Mount point for extra Zephyr modules such as `hal_espressif` from
-  the `zephyr-riscv64` SDK.
+  companion SDKs.
 
 ### `venv`
 

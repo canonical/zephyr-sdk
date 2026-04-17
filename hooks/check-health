@@ -1,0 +1,47 @@
+# Check Zephyr / SDK NG compatibility
+#
+# Compatibility matrix:
+#   SDK NG 1.1.x  → Zephyr 4.5.x
+#   SDK NG 1.0.x  → Zephyr 4.4.x
+#   SDK NG 0.17.x → Zephyr 4.2.x, 4.3.x
+ZEPHYR_VERSION=$(cat "$SDK/VERSION")
+SDK_NG_DIR="$SDK/zephyr-sdk"
+
+# Check that sdk-ng is mounted
+if [ ! -f "$SDK_NG_DIR/sdk_version" ]; then
+  workshopctl set-health --code="sdk-ng-not-mounted" error \
+    "Zephyr SDK NG not found at $SDK_NG_DIR. Connect the sdk-ng plug."
+  echo ""
+  echo "Add the following to the workshop definition:"
+  echo ""
+  echo "connections:"
+  echo "  - plug: zephyr:sdk-ng"
+  echo "    slot: zephyr-sdk-ng:sdk-ng"
+  exit 1
+fi
+
+SDK_NG_VERSION=$(cat "$SDK_NG_DIR/sdk_version")
+
+# Extract major.minor from each version (strip .patch and beyond)
+zephyr_major_minor="${ZEPHYR_VERSION%.*}"
+sdk_ng_major_minor="${SDK_NG_VERSION%.*}"
+
+compatible=false
+case "$sdk_ng_major_minor" in
+  1.1) [ "$zephyr_major_minor" = "4.5" ] && compatible=true ;;
+  1.0) [ "$zephyr_major_minor" = "4.4" ] && compatible=true ;;
+  0.17) [ "$zephyr_major_minor" = "4.2" ] || [ "$zephyr_major_minor" = "4.3" ] && compatible=true ;;
+esac
+
+if [ "$compatible" = false ]; then
+  workshopctl set-health --code="sdk-ng-incompatible" error \
+    "Zephyr SDK NG $SDK_NG_VERSION is not compatible with Zephyr $ZEPHYR_VERSION"
+  echo ""
+  echo "Compatibility matrix:"
+  echo "  SDK NG 1.1.x  → Zephyr 4.5.x"
+  echo "  SDK NG 1.0.x  → Zephyr 4.4.x"
+  echo "  SDK NG 0.17.x → Zephyr 4.2.x, 4.3.x"
+  exit 1
+fi
+
+workshopctl set-health okay
