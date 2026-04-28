@@ -4,7 +4,7 @@
 #   SDK NG 1.1.x  → Zephyr 4.5.x
 #   SDK NG 1.0.x  → Zephyr 4.4.x
 #   SDK NG 0.17.x → Zephyr 4.2.x, 4.3.x
-ZEPHYR_VERSION=$(cat "$SDK/VERSION")
+ZEPHYR_VERSION=$(cat "$SDK/version")
 SDK_NG_DIR="$SDK/zephyr-sdk"
 
 # Check that sdk-ng is mounted

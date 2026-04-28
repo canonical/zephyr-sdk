@@ -35,6 +35,7 @@ parts:
       curl -fLO "https://github.com/zephyrproject-rtos/zephyr/archive/refs/tags/v${VERSION}.tar.gz"
       tar -xzf "v${VERSION}.tar.gz" --strip-components=1 -C "$CRAFT_PART_SRC"
       rm -f "v${VERSION}.tar.gz"
+      echo "$CRAFT_PROJECT_VERSION" > version
       craftctl default
     override-build: |
       uv venv --seed .venv
@@ -47,9 +48,6 @@ parts:
 
       # virtualenv directory for the "venv" plug's workshop-target
       mkdir -p venv
-
-      echo "$CRAFT_PROJECT_VERSION" > VERSION
-
       mkdir -p zephyr-sdk
 
       craftctl default
