@@ -2,7 +2,8 @@ cat <<EOF >> ~/.profile
 
 export ZEPHYR_VERSION=v$(cat "$SDK/version")
 export ZEPHYR_BASE=$SDK
-export ZEPHYR_SDK_INSTALL_DIR=$SDK/zephyr-sdk
+export ZEPHYR_SDK_INSTALL_DIR=$SDK/zephyr-sdk/zephyr-sdk
+export ZEPHYR_MODULES=/home/workshop/modules
 EOF
 
 # shellcheck source=/dev/null
