@@ -63,9 +63,6 @@ connections:
     slot: uv:venv
 ```
 
-See the [reference workshop example](https://github.com/canonical/reference-workshops/blob/main/zephyr/workshop.yaml) for additional architecture targets (arm64,
-riscv64/ESP32-C3) and their corresponding build actions.
-
 ---
 
 ## Using the SDK
