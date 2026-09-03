@@ -63,9 +63,6 @@ connections:
     slot: uv:venv
 ```
 
-See the [reference workshop example](https://github.com/canonical/reference-workshops/blob/main/zephyr/workshop.yaml) for additional architecture targets (arm64,
-riscv64/ESP32-C3) and their corresponding build actions.
-
 ---
 
 ## Using the SDK
@@ -136,7 +133,7 @@ This SDK doesn't define any slots.
 
 - [Zephyr official documentation](https://docs.zephyrproject.org/latest/)
 - [Zephyr getting started guide](https://docs.zephyrproject.org/latest/develop/getting_started/index.html)
-- [Workshop documentation](https://canonical-workshop.readthedocs-hosted.com/latest/)
+- [Workshop documentation](https://ubuntu.com/workshop/docs/)
 
 ---
 
@@ -145,7 +142,7 @@ This SDK doesn't define any slots.
 - Zephyr community: [Zephyr GitHub](https://github.com/zephyrproject-rtos/zephyr)
 - Zephyr community forum: [Zephyr Discord](https://chat.zephyrproject.org/)
 - Workshop forum:
-  [Workshop Discourse](https://discourse.canonical.com/c/engineering/workshops/34)
+  [Discourse](https://discourse.ubuntu.com/)
 - Please review our
   [Code of Conduct](https://ubuntu.com/community/ethos/code-of-conduct) before
   participating.
