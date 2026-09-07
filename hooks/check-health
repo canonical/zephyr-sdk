@@ -4,6 +4,7 @@
 #   SDK NG 1.1.x  → Zephyr 4.5.x
 #   SDK NG 1.0.x  → Zephyr 4.4.x
 #   SDK NG 0.17.x → Zephyr 4.2.x, 4.3.x
+#   SDK NG 0.16.9 → Zephyr 3.7.x
 ZEPHYR_VERSION=$(cat "$SDK/version")
 SDK_NG_DIR="$SDK/zephyr-sdk/zephyr-sdk"
 
@@ -31,6 +32,7 @@ case "$sdk_ng_major_minor" in
   1.1) [ "$zephyr_major_minor" = "4.5" ] && compatible=true ;;
   1.0) [ "$zephyr_major_minor" = "4.4" ] && compatible=true ;;
   0.17) [ "$zephyr_major_minor" = "4.2" ] || [ "$zephyr_major_minor" = "4.3" ] && compatible=true ;;
+  0.16) [ "$zephyr_major_minor" = "3.7" ] && compatible=true ;;
 esac
 
 if [ "$compatible" = false ]; then
@@ -41,6 +43,7 @@ if [ "$compatible" = false ]; then
   echo "  SDK NG 1.1.x  → Zephyr 4.5.x"
   echo "  SDK NG 1.0.x  → Zephyr 4.4.x"
   echo "  SDK NG 0.17.x → Zephyr 4.2.x, 4.3.x"
+  echo "  SDK NG 0.16.x → Zephyr 3.7.x"
   exit 1
 fi
 
