@@ -52,6 +52,6 @@ jobs:
     with:
       platforms: '["amd64"]'
       risk: stable
-      track: ${{ matrix.track }}
+      promote-to-latest: true
     secrets:
       SDKCRAFT_STORE_CREDENTIALS: ${{ secrets.SDKCRAFT_STORE_CREDENTIALS_PROD }}
