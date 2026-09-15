@@ -1,6 +1,6 @@
 name: zephyr
 adopt-info: zephyr
-build-base: ubuntu@24.04
+build-base: ubuntu@26.04
 summary: Zephyr SDK
 description: |
   This SDK provides the Zephyr RTOS source tree and build tools (west, cmake,
@@ -8,6 +8,7 @@ description: |
   required to target a specific architecture. The Zephyr build cache and Python
   virtual environment are persisted on the host across workshop updates.
 license: Apache-2.0
+website: https://github.com/canonical/zephyr-sdk
 platforms:
   amd64:
 
