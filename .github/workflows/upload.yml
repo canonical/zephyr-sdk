@@ -16,11 +16,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Each version branch publishes to its own version track AND to an additional
+  # Ubuntu-series track. Extend the mapping below when adding a new version
+  # branch.
+  tracks:
+    runs-on: ubuntu-latest
+    outputs:
+      tracks: ${{ steps.tracks.outputs.tracks }}
+    steps:
+      - id: tracks
+        env:
+          DISPATCH_BRANCH: ${{ github.event.inputs.branch }}
+        run: |
+          set -euo pipefail
+          BRANCH="${DISPATCH_BRANCH:-${GITHUB_REF#refs/heads/}}"
+          case "$BRANCH" in
+            3.7) SERIES_TRACK="24.04" ;;
+            4.4) SERIES_TRACK="26.04" ;;
+            *)   SERIES_TRACK="" ;;
+          esac
+          if [ -n "$SERIES_TRACK" ]; then
+            TRACKS="$(jq -nc --arg b "$BRANCH" --arg s "$SERIES_TRACK" '[$b, $s]')"
+          else
+            TRACKS="$(jq -nc --arg b "$BRANCH" '[$b]')"
+          fi
+          echo "tracks=$TRACKS" >> "$GITHUB_OUTPUT"
+
   build-and-upload:
+    needs: tracks
+    strategy:
+      fail-fast: false
+      matrix:
+        track: ${{ fromJSON(needs.tracks.outputs.tracks) }}
     uses: canonical/sdkcraft-actions/.github/workflows/upload.yml@main
     with:
       platforms: '["amd64"]'
       risk: stable
-      promote-to-latest: true
+      track: ${{ matrix.track }}
     secrets:
       SDKCRAFT_STORE_CREDENTIALS: ${{ secrets.SDKCRAFT_STORE_CREDENTIALS_PROD }}
