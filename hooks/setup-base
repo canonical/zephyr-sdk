@@ -1,2 +1,26 @@
 apt-get update
-apt-get install cmake ninja-build python3-pykwalify python3-ruamel.yaml python3-pyelftools
+eatmydata -- apt-get install \
+  west \
+  cmake \
+  ninja-build \
+  python3-pykwalify \
+  python3-ruamel.yaml \
+  python3-pyelftools \
+  patool \
+  python3-anytree \
+  python3-cbor2 \
+  python3-intelhex \
+  python3-lxml \
+  python3-natsort \
+  python3-ply \
+  python3-progress \
+  python3-psutil \
+  python3-requests \
+  python3-semver \
+  python3-serial \
+  python3-setuptools \
+  python3-tabulate \
+  python3-tqdm \
+  python3-usb \
+  python3-xlsxwriter \
+  qemu-system-x86
