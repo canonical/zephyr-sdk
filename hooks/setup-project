@@ -1,10 +1,7 @@
+ZEPHYR_VERSION="v$(cat "$SDK/version")"
+
 cat <<EOF >> ~/.profile
 
-export ZEPHYR_VERSION=v$(cat "$SDK/version")
-export ZEPHYR_BASE=$SDK
+export ZEPHYR_VERSION=$ZEPHYR_VERSION
 export ZEPHYR_MODULES=/home/workshop/modules
 EOF
-
-# shellcheck source=/dev/null
-source "$SDK/venv/bin/activate"
-pip install west
