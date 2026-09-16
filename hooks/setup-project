@@ -1,16 +1,7 @@
+ZEPHYR_VERSION="v$(cat "$SDK/version")"
+
 cat <<EOF >> ~/.profile
 
-export ZEPHYR_VERSION=v$(cat "$SDK/version")
-export ZEPHYR_BASE=$SDK
+export ZEPHYR_VERSION=$ZEPHYR_VERSION
 export ZEPHYR_MODULES=/home/workshop/modules
-
-# Activate the venv (with west) for interactive login shells.
-source "$SDK/venv/bin/activate"
 EOF
-
-# Install west now, while this hook's own shell has the venv activated
-# (the venv is mounted and pip-seeded by this point in the setup order,
-# so this only needs to happen once at launch).
-# shellcheck source=/dev/null
-source "$SDK/venv/bin/activate"
-pip install west
