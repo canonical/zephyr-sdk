@@ -1,8 +1,24 @@
 apt-get update
 eatmydata -- apt-get install \
+  git \
+  cmake \
+  gperf \
+  ccache \
+  dfu-util \
+  device-tree-compiler \
+  wget \
+  xz-utils \
+  file \
+  make \
+  gcc \
+  gcc-multilib \
+  g++-multilib \
+  libsdl2-dev \
+  libmagic1 \
   west \
   cmake \
   ninja-build \
+  python3-tk \
   python3-pykwalify \
   python3-ruamel.yaml \
   python3-pyelftools \
