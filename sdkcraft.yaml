@@ -1,6 +1,6 @@
 name: zephyr
 adopt-info: zephyr
-build-base: ubuntu@24.04
+build-base: ubuntu@26.04
 summary: Zephyr SDK
 description: |
   This SDK provides the Zephyr RTOS source tree and build tools (west, cmake,
