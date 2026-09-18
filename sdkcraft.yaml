@@ -13,9 +13,6 @@ platforms:
   amd64:
 
 plugs:
-  sdk-ng:
-    interface: mount
-    workshop-target: $SDK/zephyr-sdk
   zephyr-cache:
     interface: mount
     workshop-target: /home/workshop/.cache/zephyr
@@ -29,29 +26,22 @@ plugs:
 parts:
   zephyr:
     plugin: dump
-    source: .
-    override-pull: |
-      VERSION=$(cat "$CRAFT_PROJECT_DIR/VERSION")
-      craftctl set version="$VERSION"
-      curl -fLO "https://github.com/zephyrproject-rtos/zephyr/archive/refs/tags/v${VERSION}.tar.gz"
-      tar -xzf "v${VERSION}.tar.gz" --strip-components=1 -C "$CRAFT_PART_SRC"
-      rm -f "v${VERSION}.tar.gz"
-      echo "$VERSION" > "$CRAFT_PART_SRC/version"
+    source: https://git.launchpad.net/~arctic-tern/zephyr-rtos/+git/zephyr-manifest
+    source-tag: 24.04.0-rc1
+    source-type: git
     override-build: |
-      uv venv --seed .venv
-      source .venv/bin/activate
+      craftctl set version="$(cat "$CRAFT_PROJECT_DIR/VERSION")"
 
-      [ ! -d ../.west ] && uvx west init -l .
-      uvx west update
+      cd "$CRAFT_PART_BUILD"
+      cp -a "$CRAFT_PART_SRC" manifest
 
-      rm -rf .venv ../.west
+      west init -l manifest
+      west update --narrow --fetch-opt=--depth=1
 
       # virtualenv directory for the "venv" plug's workshop-target
       mkdir -p venv
-      mkdir -p zephyr-sdk
 
       craftctl default
     build-packages:
+      - west
       - git
-    build-snaps:
-      - astral-uv
