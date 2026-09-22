@@ -27,7 +27,7 @@ parts:
   zephyr:
     plugin: dump
     source: https://git.launchpad.net/~arctic-tern/zephyr-rtos/+git/zephyr-manifest
-    source-tag: 24.04.0-rc1
+source-tag: 24.04.0
     source-type: git
     override-build: |
       craftctl set version="$(cat "$CRAFT_PROJECT_DIR/VERSION")"
