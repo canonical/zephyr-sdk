@@ -13,6 +13,9 @@ platforms:
   amd64:
 
 plugs:
+  sdk-ng:
+    interface: mount
+    workshop-target: $SDK/zephyr-sdk
   zephyr-cache:
     interface: mount
     workshop-target: /home/workshop/.cache/zephyr
@@ -40,6 +43,7 @@ parts:
 
       # virtualenv directory for the "venv" plug's workshop-target
       mkdir -p venv
+      mkdir -p zephyr-sdk
 
       craftctl default
     build-packages:
