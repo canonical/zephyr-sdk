@@ -1,4 +1,4 @@
-ZEPHYR_VERSION="v$(cat "$SDK/version")"
+ZEPHYR_VERSION="v$(awk '$1 == "version:" { print $2; exit }' "$SDK/meta/sdk.yaml")"
 
 cat <<EOF >> ~/.profile
 
