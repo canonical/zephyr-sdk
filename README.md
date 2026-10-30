@@ -12,7 +12,7 @@ updates.
 
 | SDK NG / Toolchain | Zephyr |
 |---|---|
-| 1.1.x | 4.5.x |
+| 1.0.x, 1.1.x | 4.5.x |
 | 1.0.x | 4.4.x |
 | 0.17.x | 4.2.x, 4.3.x |
 
@@ -27,12 +27,12 @@ A minimal usable workshop:
 ```yaml
 # workshop.yaml
 name: dev
-base: ubuntu@24.04
+base: ubuntu@26.04
 sdks:
   - name: uv
     channel: latest/stable
   - name: zephyr
-    channel: 4.4/stable
+    channel: 4.5/stable
   - name: zephyr-sdk-ng
     channel: 1.0.1/stable
   - name: zephyr-amd64
