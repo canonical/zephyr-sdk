@@ -25,7 +25,8 @@
     "4.1",
     "4.2",
     "4.3",
-    "4.4"
+    "4.4",
+    "4.5"
   ],
   "packageRules": [
     {
@@ -47,6 +48,11 @@
       "matchPackageNames": ["zephyrproject-rtos/zephyr"],
       "matchBaseBranches": ["4.4"],
       "allowedVersions": "/^4\\.4\\./"
+    },
+    {
+      "matchPackageNames": ["zephyrproject-rtos/zephyr"],
+      "matchBaseBranches": ["4.5"],
+      "allowedVersions": "/^4\\.5\\./"
     }
   ]
 }
