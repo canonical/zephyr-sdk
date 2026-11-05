@@ -3,5 +3,4 @@ ZEPHYR_VERSION="v$(awk '$1 == "version:" { print $2; exit }' "$SDK/meta/sdk.yaml
 cat <<EOF >> ~/.profile
 
 export ZEPHYR_VERSION=$ZEPHYR_VERSION
-export ZEPHYR_MODULES=/home/workshop/modules
 EOF
