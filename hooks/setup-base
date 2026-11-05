@@ -39,4 +39,5 @@ eatmydata -- apt-get install \
   python3-tqdm \
   python3-usb \
   python3-xlsxwriter \
+  reuse \
   qemu-system-x86
