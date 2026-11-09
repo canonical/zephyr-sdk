@@ -28,7 +28,7 @@ sdk_ng_major_minor="${SDK_NG_VERSION%.*}"
 
 compatible=false
 case "$sdk_ng_major_minor" in
-  1.1|1.0) [ "$zephyr_major_minor" = "4.5" ] && compatible=true ;;
+  1.0|1.1) [ "$zephyr_major_minor" = "4.5" ] && compatible=true ;;
   1.0) [ "$zephyr_major_minor" = "4.4" ] && compatible=true ;;
   0.17) [ "$zephyr_major_minor" = "4.2" ] || [ "$zephyr_major_minor" = "4.3" ] && compatible=true ;;
 esac

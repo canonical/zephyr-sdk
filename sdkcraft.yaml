@@ -29,26 +29,20 @@ plugs:
 parts:
   zephyr:
     plugin: dump
-    # TODO: switch to the Launchpad manifest repo once a manifest tag exists
-    # for Zephyr v4.5.0-rc2, mirroring the 26.04 branch structure:
-    #   source: https://git.launchpad.net/~arctic-tern/zephyr-rtos/+git/zephyr-manifest
-    #   source-tag: 26.10.0-rc2
-    source: https://github.com/zephyrproject-rtos/zephyr.git
-    source-branch: v4.5-branch
+    source: https://git.launchpad.net/~arctic-tern/zephyr-rtos/+git/zephyr-manifest
+    source-tag: 26.10.0-rc1
     source-type: git
-    source-depth: 1
     override-build: |
       craftctl set version="$(cat "$CRAFT_PROJECT_DIR/VERSION")"
 
       cd "$CRAFT_PART_BUILD"
 
-      # Drop the automatic source copy so the build dir holds exactly the
-      # west workspace; nest the zephyr checkout where west.yml's
-      # "self: path: zephyr" expects it.
+      # The manifest repo is the west workspace root; its west.yml points
+      # "self: path: zephyr" at the LP zephyr mirror.
       find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-      cp -a "$CRAFT_PART_SRC" zephyr
+      cp -a "$CRAFT_PART_SRC" manifest
 
-      west init -l zephyr
+      west init -l manifest
       west update --narrow --fetch-opt=--depth=1
 
       # consumed by the setup-project and check-health hooks
