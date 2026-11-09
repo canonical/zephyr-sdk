@@ -29,29 +29,43 @@ plugs:
 parts:
   zephyr:
     plugin: dump
-    source: .
-    override-pull: |
-      VERSION=$(cat "$CRAFT_PROJECT_DIR/VERSION")
-      craftctl set version="$VERSION"
-      curl -fLO "https://github.com/zephyrproject-rtos/zephyr/archive/refs/tags/v${VERSION}.tar.gz"
-      tar -xzf "v${VERSION}.tar.gz" --strip-components=1 -C "$CRAFT_PART_SRC"
-      rm -f "v${VERSION}.tar.gz"
-      echo "$VERSION" > "$CRAFT_PART_SRC/version"
+    source: https://github.com/zephyrproject-rtos/zephyr.git
+    source-tag: v4.5.0
+    source-type: git
+    source-depth: 1
     override-build: |
-      uv venv --seed .venv
-      source .venv/bin/activate
+      craftctl set version="$(cat "$CRAFT_PROJECT_DIR/VERSION")"
 
-      [ ! -d ../.west ] && uvx west init -l .
-      uvx west update
+      cd "$CRAFT_PART_BUILD"
 
-      rm -rf .venv ../.west
+      # Drop the automatic source copy so the build dir holds exactly the
+      # west workspace; nest the zephyr checkout where west.yml's
+      # "self: path: zephyr" expects it.
+      find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+      cp -a "$CRAFT_PART_SRC" zephyr
+
+      west init -l zephyr
+      west update --narrow --fetch-opt=--depth=1
+
+      # consumed by the setup-project and check-health hooks
+      cp "$CRAFT_PROJECT_DIR/VERSION" version
 
       # virtualenv directory for the "venv" plug's workshop-target
       mkdir -p venv
+
+      # mount point for the "sdk-ng" plug's workshop-target
       mkdir -p zephyr-sdk
 
       craftctl default
     build-packages:
+      - west
       - git
-    build-snaps:
-      - astral-uv
+    # The default "*" fileset is globbed without hidden files, which drops
+    # the top-level .west directory; name it explicitly so the installed
+    # tree remains a usable west workspace.
+    stage:
+      - "*"
+      - .west
+    prime:
+      - "*"
+      - .west

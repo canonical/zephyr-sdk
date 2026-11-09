@@ -33,6 +33,7 @@ jobs:
           case "$BRANCH" in
             3.7) SERIES_TRACK="24.04" ;;
             4.4) SERIES_TRACK="26.04" ;;
+            4.5) SERIES_TRACK="26.10" ;;
             *)   SERIES_TRACK="" ;;
           esac
           if [ -n "$SERIES_TRACK" ]; then
