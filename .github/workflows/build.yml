@@ -12,3 +12,7 @@ concurrency:
 jobs:
   build:
     uses: canonical/sdkcraft-actions/.github/workflows/build.yml@main
+    with:
+      # The tutorial test VM holds the Zephyr SDKs, the toolchain and a west
+      # workspace; the 20GiB default is too small.
+      test-disk-size: 64GiB

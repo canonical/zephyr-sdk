@@ -1,2 +1,6 @@
 # sdkcraft build artifacts
 *.sdk
+
+# spread run state
+tests/.spread-reuse.yaml
+tests/.craft-spread-*/

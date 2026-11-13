@@ -1,0 +1,137 @@
+summary: Replay the "Get started with Workshop" tutorial end to end
+
+details: |
+  Follows https://ubuntu.com/zephyr/docs/$ZEPHYR_LTS/tutorials/get-started-with-workshop/
+  as a user would: install LXD and Workshop, write the tutorial's workshop
+  definition, launch it, create the west workspace from the LTS manifest,
+  build samples/hello_world for qemu_x86 and run it in QEMU, then drive the
+  `sync` and `build` actions from the host.
+
+  ZEPHYR_SDK_SOURCE selects which zephyr SDK the definition consumes:
+    try   - the SDK `sdkcraft test` packed and staged in the try area
+    store - ZEPHYR_CHANNEL from the store, exactly as in the tutorial
+
+environment:
+  # Packed SDK version, asserted in try mode.
+  EXPECTED_VERSION: '$(HOST: cat "`git rev-parse --show-toplevel`/VERSION")'
+  # Free space on / needed for the workshop's storage pool and the west
+  # workspace, which both live there.
+  MIN_FREE_DISK_GIB: 30
+
+prepare: |
+  case "$ZEPHYR_SDK_SOURCE" in
+    try|store) ;;
+    *)
+      echo "ZEPHYR_SDK_SOURCE must be 'try' or 'store', not '$ZEPHYR_SDK_SOURCE'" >&2
+      exit 1
+      ;;
+  esac
+
+  # craft.spread sizes the VM disk from the LXD default profile, which is
+  # 10GiB unless raised. Fail now rather than halfway through `west update`.
+  free_gib=$(df --block-size=1G --output=avail / | tail -n 1 | tr -d ' ')
+  if [ "$free_gib" -lt "$MIN_FREE_DISK_GIB" ]; then
+    echo "/ has ${free_gib}GiB free, but this test needs ${MIN_FREE_DISK_GIB}GiB." >&2
+    echo "On the spread host, run: lxc profile device set default root size=64GiB" >&2
+    exit 1
+  fi
+
+  # Install LXD 6 and Workshop. `sdkcraft test` has already done this; the
+  # job repeats it so it also stands alone under bare craft.spread.
+  sudo snap wait system seed.loaded
+  if snap list lxd >/dev/null 2>&1; then
+    sudo snap refresh --channel=6/stable lxd
+  else
+    sudo snap install --channel=6/stable lxd
+  fi
+  sudo lxd waitready --timeout=180
+  sudo snap install --classic workshop
+
+  # The tutorial follows this with `newgrp lxd`. Group changes only apply to
+  # new logins, and Workshop talks to its own daemon, so it's skipped here.
+  sudo usermod --append --groups lxd "$(id -un)"
+
+  # Define the development environment.
+  mkdir zephyrproject
+  cd zephyrproject
+  mkdir .workshop
+  envsubst '${WORKSHOP} ${ZEPHYR_CHANNEL} ${SDK_NG_CHANNEL}' \
+    <../workshop.yaml.in >".workshop/$WORKSHOP.yaml"
+  if [ "$ZEPHYR_SDK_SOURCE" = try ]; then
+    sed -i \
+      -e 's/^  - name: zephyr$/  - name: try-zephyr/' \
+      -e '/^  - name: try-zephyr$/{n;d}' \
+      ".workshop/$WORKSHOP.yaml"
+    MATCH '^  - name: try-zephyr$' <".workshop/$WORKSHOP.yaml"
+  fi
+  cat ".workshop/$WORKSHOP.yaml"
+
+restore: |
+  if [ -d zephyrproject/.workshop ]; then
+    (cd zephyrproject && workshop remove "$WORKSHOP") || true
+  fi
+  rm -rf zephyrproject qemu-run.log build-action.stamp launch.err
+
+execute: |
+  set -o pipefail
+
+  # The tutorial runs these steps in `workshop shell`, an interactive login
+  # shell in /project; this is its non-interactive equivalent.
+  in_workshop() {
+    workshop exec -I "$WORKSHOP" -- bash -lc "$1"
+  }
+
+  cd zephyrproject
+
+  # Launch the development environment. One dropped store download aborts the
+  # whole launch; re-run it as a user would, but fail on anything else.
+  for attempt in 1 2 3; do
+    if workshop launch "$WORKSHOP" 2>../launch.err; then
+      break
+    fi
+    cat ../launch.err >&2
+    if [ "$attempt" = 3 ] || grep -q -v -E \
+      '^(error: cannot perform the following tasks:|- (Retrieve|Download) .*|"[^"]+" launch aborted)$' \
+      ../launch.err; then
+      exit 1
+    fi
+    echo "workshop launch failed on store downloads only (attempt $attempt), retrying" >&2
+  done
+  workshop info "$WORKSHOP" | MATCH 'status:\s+ready'
+  version=$(in_workshop 'echo "$ZEPHYR_VERSION"')
+  echo "zephyr SDK reports ZEPHYR_VERSION=$version"
+  if [ "$ZEPHYR_SDK_SOURCE" = try ]; then
+    test "$version" = "v$EXPECTED_VERSION"
+  fi
+
+  # Initialize and download the Zephyr source.
+  in_workshop "west init -m $ZEPHYR_MANIFEST_URL --mr $ZEPHYR_MANIFEST_TAG ."
+  tag=$(in_workshop 'git -C zephyr-manifest describe --tags --exact-match')
+  test "$tag" = "$ZEPHYR_MANIFEST_TAG"
+  in_workshop 'west update --narrow -o=--depth=1'
+  in_workshop 'west zephyr-export'
+
+  # Build and run Hello World.
+  in_workshop 'cd zephyr && west build -p always -b qemu_x86 samples/hello_world'
+  test -f zephyr/build/zephyr/zephyr.elf
+  in_workshop "$(cat ../qemu-run.sh)" | tee ../qemu-run.log
+  MATCH '\*\*\* Booting Zephyr OS' <../qemu-run.log
+  MATCH "^Hello World! $HELLO_WORLD_BOARD\s*\$" <../qemu-run.log
+
+  # Run Workshop actions from the host.
+  workshop run "$WORKSHOP" -- sync
+  touch ../build-action.stamp
+  workshop run "$WORKSHOP" -- build -p always -b qemu_x86 samples/synchronization
+  test zephyr/build/zephyr/zephyr.elf -nt ../build-action.stamp
+  MATCH '^APPLICATION_SOURCE_DIR:PATH=/project/zephyr/samples/synchronization$' \
+    <zephyr/build/CMakeCache.txt
+
+debug: |
+  cd zephyrproject 2>/dev/null || exit 0
+  cat ../qemu-run.log 2>/dev/null || true
+  workshop info "$WORKSHOP" || true
+  workshop connections "$WORKSHOP" || true
+  workshop changes || true
+  workshop tasks || true
+  df -h / || true
+  sudo lxc storage info workshop || true

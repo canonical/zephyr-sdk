@@ -1,0 +1,52 @@
+# tests/spread.yaml
+#
+# End-to-end integration test for the Zephyr 26.04 LTS SDK. Each job runs
+# inside a fresh LXD virtual machine and replays a user-facing tutorial:
+#
+#   main/get-started-with-workshop
+#     https://ubuntu.com/zephyr/docs/26.04/tutorials/get-started-with-workshop/
+#
+# `sdkcraft test` (and CI) runs the tutorial against the zephyr SDK it just
+# packed, staged in the Workshop try area. To replay the tutorial verbatim
+# against the published store SDKs instead, run craft.spread from tests/:
+#
+#   ZEPHYR_SDK_SOURCE=store /snap/sdkcraft/current/bin/craft.spread -v
+#
+# ZEPHYR_CHANNEL and SDK_NG_CHANNEL can be overridden the same way, e.g. to
+# validate a candidate before promoting it to stable.
+#
+# The VM disk size comes from the LXD default profile; the job needs 64GiB:
+#
+#   lxc profile device set default root size=64GiB
+
+project: zephyr
+
+path: /home/ubuntu/project
+
+backends:
+  lxd:
+    # The VM is the tutorial reader's host. Resolute VMs need a craft.spread
+    # that waits for the LXD agent and reloads sshd without killall; the one
+    # in sdkcraft 0.9.4 does neither.
+    systems:
+      - ubuntu-26.04:
+          username: ubuntu
+          vm: true
+
+suites:
+  main/:
+    summary: Replay the Zephyr 26.04 LTS tutorials end to end
+    # Launching the workshop, `west update` and two builds take a while.
+    warn-timeout: 30m
+    kill-timeout: 150m
+    environment:
+      ZEPHYR_LTS: "26.04"
+      WORKSHOP: zephyr-26-04
+      ZEPHYR_MANIFEST_URL: https://git.launchpad.net/~arctic-tern/zephyr-rtos/+git/zephyr-manifest
+      ZEPHYR_MANIFEST_TAG: 26.04.0
+      # Board string printed by samples/hello_world on this Zephyr release.
+      HELLO_WORLD_BOARD: qemu_x86/atom
+      # try: the SDK packed by `sdkcraft test`; store: ZEPHYR_CHANNEL.
+      ZEPHYR_SDK_SOURCE: '$(HOST: echo "${ZEPHYR_SDK_SOURCE:-try}")'
+      ZEPHYR_CHANNEL: '$(HOST: echo "${ZEPHYR_CHANNEL:-26.04/stable}")'
+      SDK_NG_CHANNEL: '$(HOST: echo "${SDK_NG_CHANNEL:-26.04.0/stable}")'
