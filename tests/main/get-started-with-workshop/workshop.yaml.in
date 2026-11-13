@@ -1,0 +1,32 @@
+# The tutorial's workshop definition, verbatim apart from the values spread
+# substitutes from tests/spread.yaml. In try mode the task's prepare step
+# swaps the zephyr store entry for `try-zephyr`.
+name: ${WORKSHOP}
+base: ubuntu@26.04
+sdks:
+  - name: uv
+    channel: latest/stable
+  - name: zephyr
+    channel: ${ZEPHYR_CHANNEL}
+  - name: zephyr-sdk-ng
+    channel: ${SDK_NG_CHANNEL}
+  - name: zephyr-amd64
+    channel: ${SDK_NG_CHANNEL}
+connections:
+  - plug: zephyr:venv
+    slot: uv:venv
+  - plug: zephyr:sdk-ng
+    slot: zephyr-sdk-ng:sdk-ng
+  - plug: zephyr-sdk-ng:amd64
+    slot: zephyr-amd64:toolchain
+actions:
+  sync: |
+    west update "$@"
+  build: |
+    source /var/lib/workshop/sdk/zephyr/venv/bin/activate
+    cd /project/zephyr
+    west build "$@"
+  flash: |
+    source /var/lib/workshop/sdk/zephyr/venv/bin/activate
+    cd /project/zephyr
+    west flash "$@"

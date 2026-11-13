@@ -129,6 +129,35 @@ This SDK doesn't define any slots.
 
 ---
 
+## Testing
+
+`tests/` holds an end-to-end [spread](https://github.com/canonical/spread)
+suite that replays the
+[Get started with Workshop](https://ubuntu.com/zephyr/docs/26.04/tutorials/get-started-with-workshop/)
+tutorial in an LXD virtual machine: it launches the tutorial's workshop, builds
+`samples/hello_world` for `qemu_x86` and runs it in QEMU, then drives the
+`sync` and `build` actions from the host.
+
+Test the SDK you just packed (the CI path):
+
+```bash
+sdkcraft pack
+lxc profile device set default root size=64GiB
+sdkcraft test
+```
+
+Replay the tutorial against the published store SDKs instead:
+
+```bash
+cd tests
+ZEPHYR_SDK_SOURCE=store /snap/sdkcraft/current/bin/craft.spread -v
+```
+
+`ZEPHYR_CHANNEL` and `SDK_NG_CHANNEL` override the store channels, for example
+to validate a candidate before promoting it.
+
+---
+
 ## Documentation and guidance
 
 - [Zephyr official documentation](https://docs.zephyrproject.org/latest/)
