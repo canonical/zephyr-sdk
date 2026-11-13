@@ -14,6 +14,10 @@
 #
 # ZEPHYR_CHANNEL and SDK_NG_CHANNEL can be overridden the same way, e.g. to
 # validate a candidate before promoting it to stable.
+#
+# The VM disk size comes from the LXD default profile; the job needs 64GiB:
+#
+#   lxc profile device set default root size=64GiB
 
 project: zephyr
 
@@ -21,11 +25,11 @@ path: /home/ubuntu/project
 
 backends:
   lxd:
-    # The VM is the tutorial reader's host; the workshop itself is ubuntu@26.04.
-    # Not ubuntu-26.04: craft.spread runs `lxc exec` as soon as the VM has an
-    # address, and on 26.04 images the LXD agent starts a few seconds later.
+    # The VM is the tutorial reader's host. Resolute VMs need a craft.spread
+    # that waits for the LXD agent and reloads sshd without killall; the one
+    # in sdkcraft 0.9.4 does neither.
     systems:
-      - ubuntu-24.04:
+      - ubuntu-26.04:
           username: ubuntu
           vm: true
 
@@ -46,6 +50,3 @@ suites:
       ZEPHYR_SDK_SOURCE: '$(HOST: echo "${ZEPHYR_SDK_SOURCE:-try}")'
       ZEPHYR_CHANNEL: '$(HOST: echo "${ZEPHYR_CHANNEL:-26.04/stable}")'
       SDK_NG_CHANNEL: '$(HOST: echo "${SDK_NG_CHANNEL:-26.04.0/stable}")'
-      # Workshop's storage pool defaults to 20% of the disk; the Zephyr SDK,
-      # its toolchain and the workshop's root filesystem need more.
-      WORKSHOP_POOL_SIZE: '$(HOST: echo "${WORKSHOP_POOL_SIZE:-40GiB}")'

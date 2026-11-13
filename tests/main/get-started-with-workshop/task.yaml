@@ -14,6 +14,9 @@ details: |
 environment:
   # Packed SDK version, asserted in try mode.
   EXPECTED_VERSION: '$(HOST: cat "`git rev-parse --show-toplevel`/VERSION")'
+  # Free space on / needed for the workshop's storage pool and the west
+  # workspace, which both live there.
+  MIN_FREE_DISK_GIB: 30
 
 prepare: |
   case "$ZEPHYR_SDK_SOURCE" in
@@ -23,6 +26,15 @@ prepare: |
       exit 1
       ;;
   esac
+
+  # craft.spread sizes the VM disk from the LXD default profile, which is
+  # 10GiB unless raised. Fail now rather than halfway through `west update`.
+  free_gib=$(df --block-size=1G --output=avail / | tail -n 1 | tr -d ' ')
+  if [ "$free_gib" -lt "$MIN_FREE_DISK_GIB" ]; then
+    echo "/ has ${free_gib}GiB free, but this test needs ${MIN_FREE_DISK_GIB}GiB." >&2
+    echo "On the spread host, run: lxc profile device set default root size=64GiB" >&2
+    exit 1
+  fi
 
   # Install LXD 6 and Workshop. `sdkcraft test` has already done this; the
   # job repeats it so it also stands alone under bare craft.spread.
@@ -53,11 +65,6 @@ prepare: |
     MATCH '^  - name: try-zephyr$' <".workshop/$WORKSHOP.yaml"
   fi
   cat ".workshop/$WORKSHOP.yaml"
-
-  # Workshop creates its storage pool on first use and sizes it from the free
-  # disk space; grow it to fit the Zephyr SDKs before launching.
-  workshop list
-  sudo lxc storage set workshop size="$WORKSHOP_POOL_SIZE"
 
 restore: |
   if [ -d zephyrproject/.workshop ]; then

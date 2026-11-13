@@ -138,11 +138,17 @@ tutorial in an LXD virtual machine: it launches the tutorial's workshop, builds
 `samples/hello_world` for `qemu_x86` and runs it in QEMU, then drives the
 `sync` and `build` actions from the host.
 
+The VMs get their disk size from the default LXD profile. Raise it first so the
+SDKs and the west workspace fit:
+
+```bash
+lxc profile device set default root size=64GiB
+```
+
 Test the SDK you just packed (the CI path):
 
 ```bash
 sdkcraft pack
-lxc profile device set default root size=64GiB
 sdkcraft test
 ```
 
